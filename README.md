@@ -149,3 +149,30 @@ python test_module.py
 5. **新建对话** — 清空上下文，开启全新对话
 
 > 配置方法详见 [MCP配置说明](./MCP_CONFIG.md)
+
+## 常见问题
+
+### Claude Code 中 MCP 返回 401 Unauthorized
+
+**现象：** 在 Claude Code 中配置了 `~/.mcp.json`，但 MCP 工具调用返回 HTTP 401。
+
+**根因：** Claude Code 可能从 `~/.claude.json` 中的 `mcpServers` 字段读取 MCP 配置，而非 `~/.mcp.json`。如果该文件中存有旧的 API Key，会覆盖正确的配置。
+
+**解决方案：**
+
+1. 检查 `~/.claude.json` 中的 `mcpServers.weknora.env.WEKNORA_API_KEY` 是否正确
+2. 同时更新 `~/.mcp.json` 和 `~/.claude.json` 中的配置
+3. 或在 MCP server 目录下创建 `.env` 文件（从 `.env.example` 复制），填入正确的 API Key
+4. 重启 Claude Code 使配置生效
+
+### MCP 工具调用报 "takes 0 positional arguments"
+
+**根因：** MCP SDK 会向所有工具处理函数传递 `arguments` 参数，但部分处理函数未声明该参数。
+
+**解决方案：** 确保所有 `_handle_*` 函数签名包含 `args: dict = None` 参数。已在 v3 版本中修复。
+
+### Windows 上环境变量未传递
+
+**现象：** `.mcp.json` 中配置了 `env` 字段，但 MCP server 未能获取到环境变量。
+
+**解决方案：** 在 MCP server 目录下创建 `.env` 文件作为备选配置，MCP server 会自动读取。
